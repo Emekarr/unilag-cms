@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 
 import Student, { IStudent } from "../model/student";
 import CustomError from "../utils/custom_error.js";
 import ServerResponse from "../utils/response.js";
 
-const sign_up = async (req: Request, res: Response, next) => {
+const sign_up = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const student_data: IStudent = req.body;
     const new_student = new Student(student_data);
