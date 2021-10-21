@@ -1,4 +1,10 @@
-import { Schema, model, Document, HookNextFunction } from "mongoose";
+import {
+  Schema,
+  model,
+  Document,
+  SchemaDefinitionProperty,
+  Model,
+} from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
@@ -14,7 +20,9 @@ export interface IStudent {
 
 interface Student extends IStudent {
   tokens: { token: string }[];
-  verified_email: string;
+  verified_email: boolean;
+  otp: number;
+  expire_at: SchemaDefinitionProperty<DateConstructor>;
 }
 
 interface StudentDocument extends Document, Student {
@@ -83,7 +91,7 @@ const StudentSchema = new Schema<StudentDocument>(
       type: Boolean,
       default: false,
     },
-    otp: String,
+    otp: Number,
     expire_at: {
       type: Date,
       default: Date.now,
@@ -102,14 +110,14 @@ StudentSchema.method("generateToken", async function (this: StudentDocument) {
   return token;
 });
 
-StudentSchema.pre(
-  "save",
-  async function (this: StudentDocument, next: HookNextFunction) {
-    if (this.isModified("password")) {
-      this.password = await bcrypt.hash(this.password, 10);
-    }
-    next();
+StudentSchema.pre("save", async function (this: StudentDocument, next) {
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 10);
   }
-);
+  next();
+});
 
-export default model<Student>("Student", StudentSchema);
+export default model<StudentDocument, Model<StudentDocument>>(
+  "Student",
+  StudentSchema
+);

@@ -1,7 +1,13 @@
-import { Router } from "express"
+import { Router } from "express";
 
-const router = Router()
+import user_controller from "../../controller/student_controller.js";
+const { sign_up, request_otp } = user_controller;
 
+const router = Router();
 
+// user auth routes
+router.post("/auth/signup", sign_up);
 
-export default router
+router.put("/auth/request-otp", request_otp);
+
+export default router;
