@@ -1,6 +1,7 @@
-import { Response, Request, ErrorRequestHandler, NextFunction } from "express";
+import { Response, Request, NextFunction } from "express";
 
-import CustomError from "../utils/custom_error";
+import CustomError from "../utils/custom_error.js";
+import ServerResponse from "../utils/response.js";
 
 const err_names = ["CastError", "SyntaxError"];
 
@@ -14,10 +15,13 @@ export default (
   console.log(`ERROR MESSAGE: ${err.message}\n ERROR_NAME: ${err.name}`);
   console.log(err);
   if (err.name === "CustomError") {
-    console.log("custom error");
+    new ServerResponse(err.message).respond(
+      res,
+      (err as CustomError).error_code
+    );
   } else if (err_names.includes(err.name)) {
-    console.log("error 400");
+    new ServerResponse(err.message).respond(res, 400);
   } else {
-    console.log("error 500");
+    new ServerResponse(err.message).respond(res, 500);
   }
 };
