@@ -1,7 +1,7 @@
 import { Router } from "express";
 
-import user_controller from "../../controller/student_controller";
-const { sign_up, request_otp } = user_controller;
+import student_controller from "../../controller/student_controller";
+const { sign_up, request_otp } = student_controller;
 
 const router = Router();
 

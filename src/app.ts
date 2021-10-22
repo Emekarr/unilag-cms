@@ -10,6 +10,9 @@ class App {
   constructor() {
     this.express = express();
 
+    this.express.use(express.json());
+    this.express.use(express.urlencoded({ extended: true }));
+
     this.express.use("/api", router);
 
     this.express.get("/health", (req: Request, res: Response) => {
