@@ -17,6 +17,13 @@ class App {
     });
 
     this.express.use(error_middleware);
+
+    this.express.use("*", (req, res) => {
+      new ServerResponse(`The route ${req.baseUrl} does not exist.`)
+        .statusCode(404)
+        .success(false)
+        .respond(res);
+    });
   }
 
   listen(port: string, cb: () => void) {
