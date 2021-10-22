@@ -1,5 +1,5 @@
-import("./app.js").then((server) => {
-  server.default.listen(process.env.PORT, () => {
+import("./app").then((server) => {
+  server.default.listen(process.env.PORT!, () => {
     console.log(`SERVER UP AND RUNNING ON PORT : ${process.env.PORT}`);
   });
 });

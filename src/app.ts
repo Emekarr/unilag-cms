@@ -1,8 +1,8 @@
 import express, { Application, Request, Response } from "express";
 
-import router from "./routes/index.js";
-import error_middleware from "./middleware/error_middleware.js";
-import ServerResponse from "./utils/response.js";
+import router from "./routes/index";
+import error_middleware from "./middleware/error_middleware";
+import ServerResponse from "./utils/response";
 
 class App {
   private express: Application;
@@ -23,4 +23,4 @@ class App {
   }
 }
 
-export default new App();
+export default new App()

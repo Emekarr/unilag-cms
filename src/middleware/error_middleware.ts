@@ -1,7 +1,7 @@
 import { Response, Request, NextFunction } from "express";
 
-import CustomError from "../utils/custom_error.js";
-import ServerResponse from "../utils/response.js";
+import CustomError from "../utils/custom_error";
+import ServerResponse from "../utils/response";
 
 const err_names = ["CastError", "SyntaxError"];
 

@@ -1,11 +1,11 @@
 import { Response } from "express";
 
 class ServerResponse {
-  readonly payload: { message: string; data: object; success: boolean };
+  readonly payload: { message: string; data: object | null; success: boolean };
 
   constructor(
     public message: string,
-    public data: object = null,
+    public data: object | null = null,
     public success: boolean = true
   ) {
     this.payload = {
@@ -25,7 +25,7 @@ class ServerResponse {
 
 export default class ServerResponseBuilder {
   private response: ServerResponse;
-  private status_code: number;
+  private status_code: number = 200;
 
   constructor(private message: string) {
     this.response = new ServerResponse(message);

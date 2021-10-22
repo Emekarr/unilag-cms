@@ -104,7 +104,7 @@ const StudentSchema = new Schema<StudentDocument>(
 );
 
 StudentSchema.method("generateToken", async function (this: StudentDocument) {
-  const token = jwt.sign({ id: this._id }, process.env.JWT_KEY);
+  const token = jwt.sign({ id: this._id }, process.env.JWT_KEY!);
   this.tokens.push({ token });
   await this.save();
   return token;

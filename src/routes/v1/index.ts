@@ -1,13 +1,10 @@
 import { Router } from "express";
 
-import user_controller from "../../controller/student_controller.js";
-const { sign_up, request_otp } = user_controller;
+import student_routes from "./student_routes";
 
 const router = Router();
 
 // user auth routes
-router.post("/auth/signup", sign_up);
-
-router.put("/auth/request-otp", request_otp);
+router.post("/student", student_routes);
 
 export default router;
