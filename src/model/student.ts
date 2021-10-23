@@ -4,6 +4,7 @@ import {
   Document,
   SchemaDefinitionProperty,
   Model,
+  Types,
 } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -23,6 +24,8 @@ interface Student extends IStudent {
   verified_email: boolean;
   otp: number;
   expire_at: SchemaDefinitionProperty<DateConstructor>;
+  admin: boolean;
+  workspaces: string;
 }
 
 interface StudentDocument extends Document, Student {
@@ -97,6 +100,17 @@ const StudentSchema = new Schema<StudentDocument>(
       default: Date.now,
       expires: process.env.DELETE_UNVERIFIED_ACCOUNT_TIME,
     },
+    admin: {
+      type: Boolean,
+      default: false,
+    },
+    workspaces: [
+      {
+        worspace: {
+          type: Types.ObjectId,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

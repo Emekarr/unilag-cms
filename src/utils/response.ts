@@ -1,24 +1,25 @@
 import { Response } from "express";
 
 class ServerResponse {
-  readonly payload: { message: string; data: object | null; success: boolean };
+  private payload: { message: string; data: object | null; success: boolean } =
+    { message: "", data: null, success: true };
 
   constructor(
     public message: string,
     public data: object | null = null,
     public success: boolean = true
-  ) {
+  ) {}
+
+  respond(res: Response, status_code: number) {
     this.payload = {
-      message: message
+      message: this.message
         .split(" ")
         .map((char) => char.substring(0, 1).toUpperCase() + char.substring(1))
         .join(" "),
-      data,
-      success,
+      data: this.data || null,
+      success: this.success || false,
     };
-  }
 
-  respond(res: Response, status_code: number) {
     res.status(status_code).json(this.payload);
   }
 }

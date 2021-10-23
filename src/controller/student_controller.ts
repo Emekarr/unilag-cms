@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { Types } from "mongoose";
 
 import Student, { IStudent } from "../model/student";
 import CustomError from "../utils/custom_error";
@@ -9,7 +10,6 @@ import send_otp_sms from "../utils/send_otp_sms";
 const sign_up = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const student_data: IStudent = req.body;
-    console.log(student_data)
     const new_student = new Student(student_data);
     const student = await new_student.save();
     if (!student) throw new CustomError("Could not create new entry.", 400);
@@ -24,13 +24,13 @@ const sign_up = async (req: Request, res: Response, next: NextFunction) => {
 
 const request_otp = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.body;
+    const id = req.body.id;
     const student = (await Student.findById(id))!;
-    if(!student) 
-          new ServerResponse("User entry deleted. Please create user again.")
-            .statusCode(400)
-            .success(false)
-            .respond(res);
+    if (!student)
+      new ServerResponse("User entry deleted. Please create user again.")
+        .statusCode(400)
+        .success(false)
+        .respond(res);
     const otp = generate_otp();
     student.otp = otp;
     if (process.env.NODE_ENV === "PROD" || process.env.NODE_ENV === "DEV") {
@@ -57,6 +57,6 @@ const request_otp = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 export default {
-    sign_up,
-    request_otp
+  sign_up,
+  request_otp,
 };
