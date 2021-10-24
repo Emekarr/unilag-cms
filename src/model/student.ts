@@ -1,11 +1,4 @@
-import {
-  Schema,
-  model,
-  Document,
-  SchemaDefinitionProperty,
-  Model,
-  Types,
-} from "mongoose";
+import { Schema, model, Document, Model, Types } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
@@ -21,9 +14,9 @@ export interface IStudent {
 
 interface Student extends IStudent {
   tokens: { token: string }[];
-  verified_email: boolean;
-  otp: number;
-  expire_at: SchemaDefinitionProperty<DateConstructor>;
+  verified_phone: boolean;
+  otp: number | null;
+  // expire_at: any;
   admin: boolean;
   workspaces: string;
 }
@@ -90,16 +83,16 @@ const StudentSchema = new Schema<StudentDocument>(
         },
       },
     ],
-    verified_email: {
+    verified_phone: {
       type: Boolean,
       default: false,
     },
     otp: Number,
-    expire_at: {
-      type: Date,
-      default: Date.now,
-      expires: process.env.DELETE_UNVERIFIED_ACCOUNT_TIME,
-    },
+    // expire_at: {
+    //   type: Date,
+    //   default: Date.now(),
+    //   expires: process.env.USER_EXPIRE_TIME,
+    // },
     admin: {
       type: Boolean,
       default: false,
