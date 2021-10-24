@@ -16,12 +16,13 @@ interface Student extends IStudent {
   tokens: { token: string }[];
   verified_phone: boolean;
   otp: number | null;
+  recovery_otp: number;
   // expire_at: any;
   admin: boolean;
   workspaces: string;
 }
 
-interface StudentDocument extends Document, Student {
+export interface StudentDocument extends Document, Student {
   generateToken(): Promise<string>;
 }
 
@@ -88,6 +89,7 @@ const StudentSchema = new Schema<StudentDocument>(
       default: false,
     },
     otp: Number,
+    recovery_otp: Number,
     // expire_at: {
     //   type: Date,
     //   default: Date.now(),

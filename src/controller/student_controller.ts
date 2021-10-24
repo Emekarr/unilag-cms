@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 
-import Student, { IStudent } from "../model/student";
+import Student, { IStudent, StudentDocument } from "../model/student";
 import CustomError from "../utils/custom_error";
 import ServerResponse from "../utils/response";
 import generate_otp from "../utils/generate_otp";
 import send_otp_sms from "../utils/send_otp_sms";
+import { AccountIdentifierType } from "../utils/identifier_types";
 
 const sign_up = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -79,8 +80,55 @@ const verify_otp = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const forgot_password = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { account_identifier, identifier_type } = req.body;
+    let student: StudentDocument | null;
+    if (identifier_type === AccountIdentifierType.MATRIC) {
+      student = await Student.findOne({ matric_no: account_identifier });
+    } else if (identifier_type === AccountIdentifierType.PHONE) {
+      student = await Student.findOne({ phone: account_identifier });
+    } else if (identifier_type === AccountIdentifierType.USERNAME) {
+      student = await Student.findOne({ username: account_identifier });
+    } else {
+      return new ServerResponse("Unrecognised identifier type passed.")
+        .statusCode(400)
+        .success(false)
+        .respond(res);
+    }
+    if (!student) {
+      return new ServerResponse("Account not found.")
+        .statusCode(400)
+        .success(false)
+        .respond(res);
+    }
+    const otp = generate_otp();
+    student.recovery_otp = otp;
+    if (process.env.NODE_ENV === "PROD" || process.env.NODE_ENV === "DEV") {
+      send_otp_sms(process.env.PLATFORM!, student.phone, otp)
+        .then(async () => {
+          await student.save();
+          new ServerResponse("OTP sent successfully.").respond(res);
+        })
+        .catch((e) => {
+          new ServerResponse("Failed to send otp.")
+            .statusCode(500)
+            .success(false)
+            .respond(res);
+        });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
 export default {
   sign_up,
   request_otp,
   verify_otp,
+  forgot_password,
 };
