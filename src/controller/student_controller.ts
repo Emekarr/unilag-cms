@@ -86,7 +86,7 @@ const verify_otp = async (req: Request, res: Response, next: NextFunction) => {
     student.expireAt = null;
     student.verified_phone = true;
     await student.save();
-    const { auth_token, refresh_token } = await student.generateToken();
+    const { auth_token, refresh_token } = await student.generateToken(req.socket.remoteAddress!);
     res.cookie("AUTH_TOKEN", auth_token, { httpOnly: true, maxAge: 14400 });
     res.cookie("REFRESH_TOKEN", refresh_token, {
       httpOnly: true,
@@ -208,7 +208,7 @@ const login_student = async (
         .statusCode(400)
         .success(false)
         .respond(res);
-    const { auth_token, refresh_token } = await student.generateToken();
+    const { auth_token, refresh_token } = await student.generateToken(req.socket.remoteAddress!);
     res.cookie("AUTH_TOKEN", auth_token, { httpOnly: true, maxAge: 14400 });
     res.cookie("REFRESH_TOKEN", refresh_token, {
       httpOnly: true,
