@@ -13,7 +13,8 @@ export interface IStudent {
 }
 
 interface Student extends IStudent {
-  tokens: { token: string }[];
+  auth_tokens: { token: string }[];
+  refresh_tokens: { token: string }[];
   verified_phone: boolean;
   otp: number | null;
   recovery_otp: number;
@@ -80,7 +81,15 @@ const StudentSchema = new Schema<StudentDocument>(
       type: String,
       required: true,
     },
-    tokens: [
+    auth_tokens: [
+      {
+        token: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+    refresh_tokens: [
       {
         token: {
           type: String,
@@ -104,9 +113,8 @@ const StudentSchema = new Schema<StudentDocument>(
     },
     workspaces: [
       {
-        worspace: {
-          type: Types.ObjectId,
-        },
+        type: Types.ObjectId,
+        ref: "WorkSpace",
       },
     ],
   },
@@ -115,12 +123,12 @@ const StudentSchema = new Schema<StudentDocument>(
   }
 );
 
-StudentSchema.method("generateToken", async function (this: StudentDocument) {
-  const token = jwt.sign({ id: this._id }, process.env.JWT_KEY!);
-  this.tokens.push({ token });
-  await this.save();
-  return token;
-});
+// StudentSchema.method("generateToken", async function (this: StudentDocument) {
+//   const token = jwt.sign({ id: this._id }, process.env.JWT_KEY!);
+//   this.tokens.push({ token });
+//   await this.save();
+//   return token;
+// });
 
 StudentSchema.pre("save", async function (this: StudentDocument, next) {
   if (this.isModified("password")) {
