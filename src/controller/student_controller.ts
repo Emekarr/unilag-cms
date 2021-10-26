@@ -12,8 +12,7 @@ const sign_up = async (req: Request, res: Response, next: NextFunction) => {
     const student_data: IStudent = req.body;
     const new_student = new Student({
       ...student_data,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      expireAt: Date.now(),
     });
     const student = await new_student.save();
     if (!student) throw new CustomError("Could not create new entry.", 400);
@@ -82,15 +81,14 @@ const verify_otp = async (req: Request, res: Response, next: NextFunction) => {
         .success(false)
         .respond(res);
       return token.deleteOne();
-    } else if (await token.verify(otp.toString())) {
-      new ServerResponse("Account verified.").respond(res);
-      return token.deleteOne();
     }
-    student.createdAt = student.updatedAt;
+    student.expireAt = null;
+    student.verified_phone = true
     await student.save();
     const auth_token = await student.generateToken();
     res.cookie("auth_token", auth_token, { httpOnly: true, maxAge: 6000 });
     new ServerResponse("Number verified.").respond(res);
+    token.deleteOne();
   } catch (err) {
     next(err);
   }
