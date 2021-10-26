@@ -1,14 +1,14 @@
 import { model, Model, Schema, Document, Types } from "mongoose";
 
-interface IWorkSpace {
+export interface IWorkSpace {
   name: string;
   department: string;
   year: number;
-  timetable: Buffer;
-  creator: { type: typeof Types.ObjectId; red: string; required: true };
+  timetable: Buffer | null;
 }
 
 export interface WorkSpaceDocument extends Document, IWorkSpace {
+  creator: { type: typeof Types.ObjectId; red: string; required: true };
   channels: Types.ObjectId[];
   members: Types.ObjectId[];
 }
