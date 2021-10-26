@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { compare } from "bcrypt";
 
 import Student, { IStudent, StudentDocument } from "../model/student";
 import Token from "../model/token";
@@ -182,10 +183,40 @@ const update_password = async (
   }
 };
 
+const login_student = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { phone, password } = req.body;
+    const student = await Student.findOne({ phone });
+    if (!student)
+      return new ServerResponse(
+        `No account registered with the number ${phone}`
+      )
+        .statusCode(400)
+        .success(false)
+        .respond(res);
+    const is_password_valid = await compare(password, student.password);
+    if (!is_password_valid)
+      return new ServerResponse("Invalid password provided.")
+        .statusCode(400)
+        .success(false)
+        .respond(res);
+    const auth_token = await student.generateToken();
+    res.cookie("auth_token", auth_token, { httpOnly: true, maxAge: 6000 });
+    new ServerResponse("Login successful").respond(res);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export default {
   sign_up,
   request_otp,
   verify_otp,
   forgot_password,
   update_password,
+  login_student,
 };
