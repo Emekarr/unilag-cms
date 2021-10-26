@@ -83,7 +83,7 @@ const verify_otp = async (req: Request, res: Response, next: NextFunction) => {
       return token.deleteOne();
     }
     student.expireAt = null;
-    student.verified_phone = true
+    student.verified_phone = true;
     await student.save();
     const auth_token = await student.generateToken();
     res.cookie("auth_token", auth_token, { httpOnly: true, maxAge: 6000 });
@@ -101,6 +101,14 @@ const forgot_password = async (
 ) => {
   try {
     const { phone } = req.body;
+    if (!phone) {
+      return new ServerResponse(
+        "Pass in the phone number used to register the account"
+      )
+        .statusCode(400)
+        .success(false)
+        .respond(res);
+    }
     let student = await Student.findOne({ phone });
     if (!student) {
       return new ServerResponse("Account not found.")
@@ -137,9 +145,47 @@ const forgot_password = async (
   }
 };
 
+const update_password = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { otp, password, phone } = req.body;
+    const student = await Student.findOne({ phone });
+    if (!student)
+      return new ServerResponse(
+        `No account registered with the number ${phone}`
+      )
+        .success(false)
+        .statusCode(400)
+        .respond(res);
+    const token = await Token.findOne({ student_id: student._id });
+    if (!token)
+      return new ServerResponse(`Token expired`)
+        .success(false)
+        .statusCode(400)
+        .respond(res);
+    if (!(await token.verify(otp.toString()))) {
+      new ServerResponse("Wrong otp provided. Please try again.")
+        .statusCode(400)
+        .success(false)
+        .respond(res);
+      return token.deleteOne();
+    } else if (await token.verify(otp.toString())) {
+      student.password = password;
+      student.save();
+      new ServerResponse("Password updated").respond(res);
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
 export default {
   sign_up,
   request_otp,
   verify_otp,
   forgot_password,
+  update_password,
 };
