@@ -13,8 +13,8 @@ export interface IStudent {
 }
 
 interface Student extends IStudent {
-  auth_tokens: { token: string }[];
-  refresh_tokens: { token: string }[];
+  auth_tokens: { token: string; refresh_token: string; createdAt: number }[];
+  refresh_tokens: { token: string; createdAt: number }[];
   verified_phone: boolean;
   otp: number | null;
   recovery_otp: number;
@@ -28,7 +28,7 @@ interface Student extends IStudent {
 }
 
 export interface StudentDocument extends Document, Student {
-  generateToken(): Promise<string>;
+  generateToken(): Promise<{ auth_token: string; refresh_token: string }>;
 }
 
 const StudentSchema = new Schema<StudentDocument>(
@@ -87,6 +87,12 @@ const StudentSchema = new Schema<StudentDocument>(
           type: String,
           required: true,
         },
+        refresh_token: String,
+        createdAt: {
+          type: Date,
+          default: Date.now,
+          expires: 14400,
+        },
       },
     ],
     refresh_tokens: [
@@ -94,6 +100,11 @@ const StudentSchema = new Schema<StudentDocument>(
         token: {
           type: String,
           required: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+          expires: 7884008,
         },
       },
     ],
@@ -123,12 +134,31 @@ const StudentSchema = new Schema<StudentDocument>(
   }
 );
 
-// StudentSchema.method("generateToken", async function (this: StudentDocument) {
-//   const token = jwt.sign({ id: this._id }, process.env.JWT_KEY!);
-//   this.tokens.push({ token });
-//   await this.save();
-//   return token;
-// });
+StudentSchema.method(
+  "generateToken",
+  async function (this: StudentDocument, ip_address: string) {
+    const refresh_token = jwt.sign(
+      { id: this._id, ip_address },
+      process.env.JWT_REFRESH_KEY!
+    );
+    const auth_token = jwt.sign(
+      { id: this._id, ip_address, refresh_token },
+      process.env.JWT_AUTH_KEY!
+    );
+
+    this.refresh_tokens.push({
+      token: refresh_token,
+      createdAt: Date.now(),
+    });
+    this.auth_tokens.push({
+      token: auth_token,
+      refresh_token,
+      createdAt: Date.now(),
+    });
+    await this.save();
+    return { auth_token, refresh_token };
+  }
+);
 
 StudentSchema.pre("save", async function (this: StudentDocument, next) {
   if (this.isModified("password")) {

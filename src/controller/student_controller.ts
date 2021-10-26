@@ -86,8 +86,12 @@ const verify_otp = async (req: Request, res: Response, next: NextFunction) => {
     student.expireAt = null;
     student.verified_phone = true;
     await student.save();
-    const auth_token = await student.generateToken();
-    res.cookie("auth_token", auth_token, { httpOnly: true, maxAge: 6000 });
+    const { auth_token, refresh_token } = await student.generateToken();
+    res.cookie("AUTH_TOKEN", auth_token, { httpOnly: true, maxAge: 14400 });
+    res.cookie("REFRESH_TOKEN", refresh_token, {
+      httpOnly: true,
+      maxAge: 7884008,
+    });
     new ServerResponse("Number verified.").respond(res);
     token.deleteOne();
   } catch (err) {
@@ -204,8 +208,12 @@ const login_student = async (
         .statusCode(400)
         .success(false)
         .respond(res);
-    const auth_token = await student.generateToken();
-    res.cookie("auth_token", auth_token, { httpOnly: true, maxAge: 6000 });
+    const { auth_token, refresh_token } = await student.generateToken();
+    res.cookie("AUTH_TOKEN", auth_token, { httpOnly: true, maxAge: 14400 });
+    res.cookie("REFRESH_TOKEN", refresh_token, {
+      httpOnly: true,
+      maxAge: 7884008,
+    });
     new ServerResponse("Login successful").respond(res);
   } catch (err) {
     next(err);
