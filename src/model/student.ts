@@ -17,7 +17,16 @@ interface Student extends IStudent {
   verified_phone: boolean;
   otp: number | null;
   recovery_otp: number;
-  // expire_at: any;
+  createdAt: {
+    type: DateConstructor;
+    default: () => number;
+    expires: number | null;
+  } | null;
+  updatedAt: {
+    type: DateConstructor;
+    default: () => number;
+    expires: null;
+  } | null;
   admin: boolean;
   workspaces: string;
 }
@@ -88,13 +97,17 @@ const StudentSchema = new Schema<StudentDocument>(
       type: Boolean,
       default: false,
     },
-    otp: Number,
     recovery_otp: Number,
-    // expire_at: {
-    //   type: Date,
-    //   default: Date.now(),
-    //   expires: process.env.USER_EXPIRE_TIME,
-    // },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      expires: 300,
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now,
+      expires: null,
+    },
     admin: {
       type: Boolean,
       default: false,
