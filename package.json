@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "env-cmd -f ./config/dev.env nodemon ./src/server.ts",
     "build": "rimraf ./build && tsc",
-    "start": "npm run build && node build/server.js"
+    "start": "yarn run build && node build/server.js"
   },
   "engines": {
     "node": "14.x"
