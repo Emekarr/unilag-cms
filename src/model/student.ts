@@ -29,7 +29,7 @@ interface Student extends IStudent {
     expires: number | null;
   } | null;
   admin: boolean;
-  workspaces: string;
+  workspaces: { workspace_name: string }[];
 }
 
 export interface StudentDocument extends Document, Student {
@@ -192,7 +192,7 @@ StudentSchema.pre("save", async function (this: StudentDocument, next) {
 StudentSchema.method("toJSON", function (this: StudentDocument) {
   const student = this.toObject();
   delete student.__v;
-  delete student.auth_tokens
+  delete student.auth_tokens;
   delete student.refresh_tokens;
   delete student.expireAt;
   delete student.password;
