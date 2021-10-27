@@ -86,7 +86,9 @@ const verify_otp = async (req: Request, res: Response, next: NextFunction) => {
     student.expireAt = null;
     student.verified_phone = true;
     await student.save();
-    const { auth_token, refresh_token } = await student.generateToken(req.socket.remoteAddress!);
+    const { auth_token, refresh_token } = await student.generateToken(
+      req.socket.remoteAddress!
+    );
     res.cookie("AUTH_TOKEN", auth_token, { httpOnly: true, maxAge: 14400 });
     res.cookie("REFRESH_TOKEN", refresh_token, {
       httpOnly: true,
@@ -208,13 +210,45 @@ const login_student = async (
         .statusCode(400)
         .success(false)
         .respond(res);
-    const { auth_token, refresh_token } = await student.generateToken(req.socket.remoteAddress!);
+    const { auth_token, refresh_token } = await student.generateToken(
+      req.socket.remoteAddress!
+    );
     res.cookie("AUTH_TOKEN", auth_token, { httpOnly: true, maxAge: 14400 });
     res.cookie("REFRESH_TOKEN", refresh_token, {
       httpOnly: true,
       maxAge: 7884008,
     });
     new ServerResponse("Login successful").respond(res);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const get_profile = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id, matric, username } = req.body;
+    if (!id && !matric && !username)
+      return new ServerResponse("Provide a student ID to search for.")
+        .statusCode(404)
+        .success(false)
+        .respond(res);
+    let student: StudentDocument | null | undefined;
+    if (id) {
+      student = await Student.findById(id);
+    } else if (matric) {
+      student = await Student.findOne({ matric_no: matric });
+    } else if (username) {
+      student = await Student.findOne({ username });
+    }
+    if (!student)
+      return new ServerResponse("No profile found matching the info provided")
+        .statusCode(404)
+        .success(false)
+        .respond(res);
+
+    new ServerResponse("Successfully retrieved profile")
+      .data(student)
+      .respond(res);
   } catch (err) {
     next(err);
   }
@@ -227,4 +261,5 @@ export default {
   forgot_password,
   update_password,
   login_student,
+  get_profile,
 };

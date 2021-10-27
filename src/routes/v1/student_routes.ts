@@ -8,7 +8,9 @@ const {
   forgot_password,
   update_password,
   login_student,
+  get_profile,
 } = student_controller;
+import auth_middleware from "../../middleware/auth_middleware";
 
 const router = Router();
 
@@ -24,5 +26,8 @@ router.patch("/auth/verify-otp", verify_otp);
 router.patch("/auth/forgot-password", forgot_password);
 
 router.patch("/auth/update-password", update_password);
+
+// other routes
+router.get("/profile", auth_middleware, get_profile);
 
 export default router;
