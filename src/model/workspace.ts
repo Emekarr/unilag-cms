@@ -54,6 +54,12 @@ WorkSpaceSchema.virtual("members", {
   foreignField: "workspaces",
 });
 
+WorkSpaceSchema.method("toJSON", function (this: WorkSpaceDocument) {
+  const workspace = this.toObject();
+  delete workspace.__v;
+  return workspace;
+});
+
 export default model<WorkSpaceDocument, Model<WorkSpaceDocument>>(
   "WorkSpace",
   WorkSpaceSchema
