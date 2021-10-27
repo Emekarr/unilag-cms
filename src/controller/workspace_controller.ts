@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-import WorkSpace, { IWorkSpace } from "../model/workspace";
+import WorkSpace, { IWorkSpace, WorkSpaceDocument } from "../model/workspace";
 import Student from "../model/student";
 import CustomError from "../utils/custom_error";
 import ServerResponse from "../utils/response";
@@ -48,8 +48,10 @@ const join_workspace = async (
     const already_a_member = student.workspaces.find(
       (ws) => ws.workspace_name === workspace_name
     );
-    if (already_a_member) 
-    new ServerResponse("You are already a member of this workspace.").respond(res);
+    if (already_a_member)
+      new ServerResponse("You are already a member of this workspace.").respond(
+        res
+      );
     student.workspaces.push({ workspace_name });
     await student.save();
     new ServerResponse("Joined workspace successfully.").respond(res);
@@ -58,7 +60,54 @@ const join_workspace = async (
   }
 };
 
+const get_info = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { workspace_name, workspace_id } = req.body;
+    if (!workspace_id || !workspace_name) {
+      throw new CustomError(
+        "Please provide a workspace id or name to work with.",
+        400
+      );
+    }
+
+    let workspace: WorkSpaceDocument | null | undefined;
+    if (workspace_name) {
+      workspace = await WorkSpace.findOne({ name: workspace_name });
+      if (!workspace)
+        return new ServerResponse("No workspace exists with such name")
+          .statusCode(404)
+          .success(false)
+          .respond(res);
+    } else if (workspace_id) {
+      workspace = await WorkSpace.findById(workspace_id);
+      if (!workspace)
+        return new ServerResponse("No workspace exists with such name")
+          .statusCode(404)
+          .success(false)
+          .respond(res);
+    }
+    const student = await Student.findById(req.id);
+    const is_member = student.workspaces.find(
+      (ws) => ws.workspace_name === workspace.name
+    );
+    if (!is_member)
+      return new ServerResponse(
+        "You are not a member of this workspace so you cannot access this information."
+      )
+        .statusCode(404)
+        .success(false)
+        .respond(res);
+
+    new ServerResponse("WorkSpace data found and returned.")
+      .data(workspace)
+      .respond(res);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export default {
   create_workspace,
   join_workspace,
+  get_info,
 };
