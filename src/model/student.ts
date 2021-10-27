@@ -9,16 +9,21 @@ export interface IStudent {
   department: string;
   matric_no: string;
   phone: string;
-  password: string;
+  password?: string;
 }
 
 interface Student extends IStudent {
-  auth_tokens: { token: string; refresh_token: string; createdAt: number, ip_address: string }[];
-  refresh_tokens: { token: string; createdAt: number, ip_address: string }[];
+  auth_tokens?: {
+    token: string;
+    refresh_token: string;
+    createdAt: number;
+    ip_address: string;
+  }[];
+  refresh_tokens?: { token: string; createdAt: number; ip_address: string }[];
   verified_phone: boolean;
   otp: number | null;
   recovery_otp: number;
-  expireAt: {
+  expireAt?: {
     type: DateConstructor;
     default: () => number;
     expires: number | null;
@@ -28,7 +33,9 @@ interface Student extends IStudent {
 }
 
 export interface StudentDocument extends Document, Student {
-  generateToken(ip_address: string): Promise<{ auth_token: string; refresh_token: string }>;
+  generateToken(
+    ip_address: string
+  ): Promise<{ auth_token: string; refresh_token: string }>;
 }
 
 const StudentSchema = new Schema<StudentDocument>(
@@ -89,11 +96,11 @@ const StudentSchema = new Schema<StudentDocument>(
         },
         refresh_token: {
           type: String,
-          required: true
+          required: true,
         },
-        ip_address:{
+        ip_address: {
           type: String,
-          required: true
+          required: true,
         },
         createdAt: {
           type: Date,
@@ -108,9 +115,9 @@ const StudentSchema = new Schema<StudentDocument>(
           type: String,
           required: true,
         },
-        ip_address:{
+        ip_address: {
           type: String,
-          required: true
+          required: true,
         },
         createdAt: {
           type: Date,
@@ -149,7 +156,7 @@ StudentSchema.method(
   "generateToken",
   async function (this: StudentDocument, ip_address: string) {
     const refresh_token = jwt.sign(
-      { id: this._id, },
+      { id: this._id },
       process.env.JWT_REFRESH_KEY!,
       { expiresIn: "730h" }
     );
@@ -159,16 +166,16 @@ StudentSchema.method(
       { expiresIn: "4h" }
     );
 
-    this.refresh_tokens.push({
+    this.refresh_tokens!.push({
       token: refresh_token,
       createdAt: Date.now(),
-      ip_address
+      ip_address,
     });
-    this.auth_tokens.push({
+    this.auth_tokens!.push({
       token: auth_token,
       refresh_token,
       createdAt: Date.now(),
-      ip_address
+      ip_address,
     });
     await this.save();
     return { auth_token, refresh_token };
@@ -177,9 +184,19 @@ StudentSchema.method(
 
 StudentSchema.pre("save", async function (this: StudentDocument, next) {
   if (this.isModified("password")) {
-    this.password = await bcrypt.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password!, 10);
   }
   next();
+});
+
+StudentSchema.method("toJSON", function (this: StudentDocument) {
+  const student = this.toObject();
+  delete student.__v;
+  delete student.auth_tokens
+  delete student.refresh_tokens;
+  delete student.expireAt;
+  delete student.password;
+  return student;
 });
 
 export default model<StudentDocument, Model<StudentDocument>>(

@@ -204,7 +204,7 @@ const login_student = async (
         .statusCode(400)
         .success(false)
         .respond(res);
-    const is_password_valid = await compare(password, student.password);
+    const is_password_valid = await compare(password, student.password!);
     if (!is_password_valid)
       return new ServerResponse("Invalid password provided.")
         .statusCode(400)

@@ -46,7 +46,7 @@ export default async (
         .statusCode(400)
         .success(false)
         .respond(res);
-    const auth_token_match = student.auth_tokens.find(
+    const auth_token_match = student.auth_tokens!.find(
       (token) => token.token === auth_token
     );
     if (!auth_token_match)
@@ -54,7 +54,7 @@ export default async (
         .statusCode(400)
         .success(false)
         .respond(res);
-    const refresh_token_match = student.refresh_tokens.find(
+    const refresh_token_match = student.refresh_tokens!.find(
       (token) => token.token === refresh_token
     );
     if (!refresh_token_match)
@@ -67,10 +67,10 @@ export default async (
       ip_address !== auth_token_match.ip_address ||
       ip_address !== refresh_token_match.ip_address
     ) {
-      student.auth_tokens = student.auth_tokens.filter(
+      student.auth_tokens = student.auth_tokens!.filter(
         (token) => token.token !== auth_token
       );
-      student.refresh_tokens = student.refresh_tokens.filter(
+      student.refresh_tokens = student.refresh_tokens!.filter(
         (token) => token.token !== refresh_token
       );
       await student.save();
