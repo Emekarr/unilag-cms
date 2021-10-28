@@ -2,16 +2,19 @@ import { Schema, model, Model, Document, Types } from "mongoose";
 
 interface IChannel {
   name: string;
-  workspace: { type: typeof Types.ObjectId; ref: string; required: true };
+  workspace: Types.ObjectId;
   compulsory: boolean;
 }
 
-export interface ChannelDocument extends IChannel, Document {
+interface Channel extends IChannel {
   subscribers: Types.ObjectId[];
+}
+
+export interface ChannelDocument extends Channel, Document {
   getSubscribersNumber: () => number;
 }
 
-const ChannelSchema = new Schema<ChannelDocument>({
+const channel_schema_fields: Record<keyof Channel, any> = {
   name: {
     type: String,
     required: true,
@@ -37,6 +40,10 @@ const ChannelSchema = new Schema<ChannelDocument>({
       },
     },
   ],
+};
+
+const ChannelSchema = new Schema<IChannel>(channel_schema_fields, {
+  timestamps: true,
 });
 
 ChannelSchema.method("getSubscribersNumber", function (this: ChannelDocument) {

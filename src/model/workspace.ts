@@ -5,48 +5,47 @@ export interface IWorkSpace {
   department: string;
   year: number;
   timetable: Buffer | null;
+  creator: Types.ObjectId;
 }
 
 export interface WorkSpaceDocument extends Document, IWorkSpace {
-  creator: { type: typeof Types.ObjectId; red: string; required: true };
   channels: Types.ObjectId[];
   members: Types.ObjectId[];
 }
 
-const WorkSpaceSchema = new Schema<WorkSpaceDocument>(
-  {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 30,
-      minlength: 2,
-    },
-    department: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 30,
-      minlength: 2,
-    },
-    year: {
-      type: Number,
-      required: true,
-      trim: true,
-      minlength: 4,
-      maxlength: 4,
-    },
-    timetable: Buffer,
-    creator: {
-      type: Types.ObjectId,
-      red: "Student",
-      required: true,
-    },
+const workspace_schema_fields: Record<keyof IWorkSpace, any> = {
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 30,
+    minlength: 2,
   },
-  {
-    timestamps: true,
-  }
-);
+  department: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 30,
+    minlength: 2,
+  },
+  year: {
+    type: Number,
+    required: true,
+    trim: true,
+    minlength: 4,
+    maxlength: 4,
+  },
+  timetable: Buffer,
+  creator: {
+    type: Types.ObjectId,
+    red: "Student",
+    required: true,
+  },
+};
+
+const WorkSpaceSchema = new Schema(workspace_schema_fields, {
+  timestamps: true,
+});
 
 WorkSpaceSchema.virtual("members", {
   ref: "Student",
@@ -60,7 +59,4 @@ WorkSpaceSchema.method("toJSON", function (this: WorkSpaceDocument) {
   return workspace;
 });
 
-export default model<WorkSpaceDocument, Model<WorkSpaceDocument>>(
-  "WorkSpace",
-  WorkSpaceSchema
-);
+export default model<WorkSpaceDocument>("WorkSpace", WorkSpaceSchema);
