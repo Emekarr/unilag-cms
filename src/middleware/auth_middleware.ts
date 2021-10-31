@@ -1,36 +1,58 @@
 import { Request, Response, NextFunction } from "express";
-import jwt, { JwtPayload, TokenExpiredError } from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 import ServerResponse from "../utils/response";
 import Student from "../model/student";
+import RefreshToken from "../model/refresh_token";
+import AuthToken from "../model/auth_token";
 
-export default async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export default async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const auth_token = req.headers.authorizationauthtoken as string;
-    const refresh_token = req.headers.authorizationrefreshtoken as string;
+    const auth_token_header = req.headers.authorizationauthtoken as string;
+    const refresh_token_header = req.headers
+      .authorizationrefreshtoken as string;
     if (
-      !auth_token ||
-      auth_token === " " ||
-      !refresh_token ||
-      refresh_token === " "
+      !auth_token_header ||
+      auth_token_header === " " ||
+      !refresh_token_header ||
+      refresh_token_header === " "
     )
       return new ServerResponse("Tokens not provided")
         .statusCode(400)
         .success(false)
         .respond(res);
-    const refresh_decoded = jwt.verify(
-      refresh_token,
-      process.env.JWT_REFRESH_KEY!
-    ) as JwtPayload;
-    const auth_decoded = jwt.verify(
-      auth_token,
+
+    let refresh_decoded: JwtPayload | undefined;
+    jwt.verify(
+      refresh_token_header,
+      process.env.JWT_REFRESH_KEY!,
+      function (err, decoded) {
+        if (err.name === "TokenExpiredError") {
+          return new ServerResponse(
+            "Refresh token expired. Please sign in again."
+          )
+            .statusCode(400)
+            .success(false)
+            .respond(res);
+        }
+        refresh_decoded = decoded;
+      }
+    );
+    let auth_decoded: JwtPayload | undefined;
+    jwt.verify(
+      auth_token_header,
       process.env.JWT_AUTH_KEY!,
-    ) as JwtPayload;
-    if (auth_decoded.refresh_token !== refresh_token)
+      function (err, decoded) {
+        if (err.name === "TokenExpiredError") {
+          return new ServerResponse("Auth token expired. Please sign in again.")
+            .statusCode(400)
+            .success(false)
+            .respond(res);
+        }
+      }
+    );
+
+    if (auth_decoded.refresh_token !== refresh_token_header)
       return new ServerResponse("Invalid tokens used.")
         .statusCode(400)
         .success(false)
@@ -40,40 +62,42 @@ export default async (
         .statusCode(400)
         .success(false)
         .respond(res);
+
     const student = await Student.findById(refresh_decoded.id);
     if (!student)
       return new ServerResponse("No user was found.")
         .statusCode(400)
         .success(false)
         .respond(res);
-    const auth_token_match = student.auth_tokens!.find(
-      (token) => token.token === auth_token
-    );
-    if (!auth_token_match)
-      return new ServerResponse("Invalid tokens used.")
+
+    const refresh_token = await RefreshToken.findOne({
+      owner: auth_decoded.id,
+      token: refresh_token_header,
+    });
+    if (!refresh_token)
+      return new ServerResponse("Expired refresh token used.")
         .statusCode(400)
         .success(false)
         .respond(res);
-    const refresh_token_match = student.refresh_tokens!.find(
-      (token) => token.token === refresh_token
-    );
-    if (!refresh_token_match)
-      return new ServerResponse("Invalid tokens used.")
+
+    const auth_token = await AuthToken.findOne({
+      owner: auth_decoded.id,
+      refresh_token: refresh_token.token,
+      token: auth_token_header,
+    });
+    if (!auth_token)
+      return new ServerResponse("Expired auth token used.")
         .statusCode(400)
         .success(false)
         .respond(res);
+
     const ip_address = req.socket.remoteAddress!;
     if (
-      ip_address !== auth_token_match.ip_address ||
-      ip_address !== refresh_token_match.ip_address
+      ip_address !== auth_token.ip_address ||
+      ip_address !== refresh_token.ip_address
     ) {
-      student.auth_tokens = student.auth_tokens!.filter(
-        (token) => token.token !== auth_token
-      );
-      student.refresh_tokens = student.refresh_tokens!.filter(
-        (token) => token.token !== refresh_token
-      );
-      await student.save();
+      await auth_token.deleteOne();
+      await refresh_token.deleteOne();
       return new ServerResponse("token used from unrecognised device.")
         .statusCode(400)
         .success(false)

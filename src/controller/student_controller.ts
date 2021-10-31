@@ -83,7 +83,7 @@ const verify_otp = async (req: Request, res: Response, next: NextFunction) => {
         .respond(res);
       return token.deleteOne();
     }
-    student.expireAt = null;
+    student.createdAt = null;
     student.verified_phone = true;
     await student.save();
     const { auth_token, refresh_token } = await student.generateToken(

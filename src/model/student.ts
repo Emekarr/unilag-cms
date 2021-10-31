@@ -2,6 +2,9 @@ import { Schema, model, Document, Model, Types } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
+import AuthToken from "./auth_token";
+import RefreshToken from "./refresh_token";
+
 export interface IStudent {
   firstname: string;
   lastname: string;
@@ -13,16 +16,9 @@ export interface IStudent {
 }
 
 interface Student extends IStudent {
-  auth_tokens?: {
-    token: string;
-    refresh_token: string;
-    createdAt: number;
-    ip_address: string;
-  }[];
-  refresh_tokens?: { token: string; createdAt: number; ip_address: string }[];
   verified_phone: boolean;
   recovery_otp: number;
-  expireAt?: number | null;
+  createdAt?: number | null;
   admin: boolean;
   workspaces: { workspace_name: string }[];
 }
@@ -82,53 +78,15 @@ const student_schema_fields: Record<keyof Student, any> = {
     type: String,
     required: true,
   },
-  auth_tokens: [
-    {
-      token: {
-        type: String,
-        required: true,
-      },
-      refresh_token: {
-        type: String,
-        required: true,
-      },
-      ip_address: {
-        type: String,
-        required: true,
-      },
-      createdAt: {
-        type: Date,
-        default: Date.now,
-        expires: 14400,
-      },
-    },
-  ],
-  refresh_tokens: [
-    {
-      token: {
-        type: String,
-        required: true,
-      },
-      ip_address: {
-        type: String,
-        required: true,
-      },
-      createdAt: {
-        type: Date,
-        default: Date.now,
-        expires: 7884008,
-      },
-    },
-  ],
   verified_phone: {
     type: Boolean,
     default: false,
   },
   recovery_otp: Number,
-  expireAt: {
+  createdAt: {
     type: Date,
     default: Date.now,
-    expires: 300,
+    // expires: "5m",
   },
   admin: {
     type: Boolean,
@@ -160,18 +118,20 @@ StudentSchema.method(
       { expiresIn: "4h" }
     );
 
-    this.refresh_tokens!.push({
+    await new RefreshToken({
       token: refresh_token,
       createdAt: Date.now(),
       ip_address,
-    });
-    this.auth_tokens!.push({
+      owner: this._id,
+    }).save();
+    await new AuthToken({
       token: auth_token,
       refresh_token,
       createdAt: Date.now(),
       ip_address,
-    });
-    await this.save();
+      owner: this._id,
+    }).save();
+
     return { auth_token, refresh_token };
   }
 );
@@ -186,9 +146,7 @@ StudentSchema.pre("save", async function (this: StudentDocument, next) {
 StudentSchema.method("toJSON", function (this: StudentDocument) {
   const student = this.toObject();
   delete student.__v;
-  delete student.auth_tokens;
-  delete student.refresh_tokens;
-  delete student.expireAt;
+  delete student.createdAt;
   delete student.password;
   return student;
 });
