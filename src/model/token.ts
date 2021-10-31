@@ -3,16 +3,15 @@ import { hash, compare } from "bcrypt";
 
 interface IToken {
   token: string;
+  student_id: Types.ObjectId;
+  createdAt: string;
 }
 
 interface TokenDocument extends Document, IToken {
-  student_id: { type: typeof Types.ObjectId; ref: string; required: true };
-  token: string;
-  createdAt: { type: DateConstructor; default: () => number; expires: number };
   verify: (otp: string) => Promise<boolean>;
 }
 
-const TokenSchema = new Schema<TokenDocument>({
+const token_schema_fields: Record<keyof IToken, any> = {
   student_id: {
     type: Types.ObjectId,
     ref: "Student",
@@ -25,8 +24,12 @@ const TokenSchema = new Schema<TokenDocument>({
   createdAt: {
     type: Date,
     default: Date.now,
-    expires: 300,
+    expires: "5m",
   },
+};
+
+const TokenSchema = new Schema<TokenDocument>(token_schema_fields, {
+  timestamps: true,
 });
 
 TokenSchema.pre("save", async function (this: TokenDocument, next) {
