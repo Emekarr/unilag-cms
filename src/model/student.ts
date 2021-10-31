@@ -21,6 +21,7 @@ interface Student extends IStudent {
   createdAt?: number | null;
   admin: boolean;
   workspaces: Types.ObjectId[];
+  electives: Types.ObjectId[];
 }
 
 export interface StudentDocument extends Document, Student {
@@ -93,6 +94,12 @@ const student_schema_fields: Record<keyof Student, any> = {
     default: false,
   },
   workspaces: [
+    {
+      type: Types.ObjectId,
+      ref: "WorkSpace",
+    },
+  ],
+  electives: [
     {
       type: Types.ObjectId,
       ref: "WorkSpace",
