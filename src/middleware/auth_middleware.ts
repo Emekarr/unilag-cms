@@ -27,30 +27,50 @@ export default async (req: Request, res: Response, next: NextFunction) => {
       refresh_token_header,
       process.env.JWT_REFRESH_KEY!,
       function (err, decoded) {
-        if (err.name === "TokenExpiredError") {
-          return new ServerResponse(
-            "Refresh token expired. Please sign in again."
-          )
-            .statusCode(400)
-            .success(false)
-            .respond(res);
+        if (err) {
+          if (err.name === "TokenExpiredError") {
+            return new ServerResponse(
+              "Refresh token expired. Please sign in again."
+            )
+              .statusCode(400)
+              .success(false)
+              .respond(res);
+          }
         }
         refresh_decoded = decoded;
       }
     );
+
+    if (!refresh_decoded)
+      return new ServerResponse("Refresh token expired. Please sign in again.")
+        .statusCode(400)
+        .success(false)
+        .respond(res);
+
     let auth_decoded: JwtPayload | undefined;
     jwt.verify(
       auth_token_header,
       process.env.JWT_AUTH_KEY!,
       function (err, decoded) {
-        if (err.name === "TokenExpiredError") {
-          return new ServerResponse("Auth token expired. Please sign in again.")
-            .statusCode(400)
-            .success(false)
-            .respond(res);
+        if (err) {
+          if (err.name === "TokenExpiredError") {
+            return new ServerResponse(
+              "Auth token expired. Please sign in again."
+            )
+              .statusCode(400)
+              .success(false)
+              .respond(res);
+          }
         }
+        auth_decoded = decoded;
       }
     );
+
+    if (!auth_decoded)
+      return new ServerResponse("Auth token expired. Please sign in again.")
+        .statusCode(400)
+        .success(false)
+        .respond(res);
 
     if (auth_decoded.refresh_token !== refresh_token_header)
       return new ServerResponse("Invalid tokens used.")
@@ -105,6 +125,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     }
     req.id = student._id;
     req.is_admin = student.admin;
+    console.log("end");
     next();
   } catch (err) {
     next(err);

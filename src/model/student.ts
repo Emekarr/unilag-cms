@@ -20,7 +20,7 @@ interface Student extends IStudent {
   recovery_otp: number;
   createdAt?: number | null;
   admin: boolean;
-  workspaces: { workspace_name: string }[];
+  workspaces: Types.ObjectId[];
 }
 
 export interface StudentDocument extends Document, Student {

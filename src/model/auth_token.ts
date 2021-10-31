@@ -31,7 +31,7 @@ const auth_token_fields: Record<keyof IAuthToken, any> = {
   createdAt: {
     type: Date,
     default: Date.now,
-    expires: "3",
+    expires: process.env.AUTH_TOKEN_LIFE,
   },
 };
 

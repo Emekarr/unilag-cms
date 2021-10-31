@@ -20,6 +20,7 @@ const workspace_schema_fields: Record<keyof IWorkSpace, any> = {
     trim: true,
     maxlength: 30,
     minlength: 2,
+    unique: true,
   },
   department: {
     type: String,

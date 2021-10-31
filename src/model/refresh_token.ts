@@ -26,7 +26,7 @@ const refresh_token_fields: Record<keyof IRefreshToken, any> = {
   createdAt: {
     type: Date,
     default: Date.now,
-    expires: "3",
+    expires: process.env.REFRESH_TOKEN_LIFE,
   },
 };
 
