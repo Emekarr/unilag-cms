@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 
-import CustomError from "../utils/custom_error";
 import ServerResponse from "../utils/response";
 
 export default (req: Request, res: Response, next: NextFunction) => {

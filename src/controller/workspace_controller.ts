@@ -11,6 +11,9 @@ const create_workspace = async (
   next: NextFunction
 ) => {
   try {
+    if (!req.is_admin)
+      throw new CustomError("Only admins can access this route.", 401);
+
     const workspace_details: IWorkSpace = req.body;
     const new_workspace = new WorkSpace({
       ...workspace_details,
@@ -102,6 +105,20 @@ const get_info = async (req: Request, res: Response, next: NextFunction) => {
     new ServerResponse("WorkSpace data found and returned.")
       .data(workspace)
       .respond(res);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const set_timetable = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.is_admin)
+      throw new CustomError("Only admins can access this route.", 401);
+    
   } catch (err) {
     next(err);
   }
