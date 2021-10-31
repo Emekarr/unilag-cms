@@ -1,9 +1,10 @@
 import { Schema, model, Model, Document, Types } from "mongoose";
 
-interface IChannel {
+export interface IChannel {
   name: string;
   workspace: Types.ObjectId;
   compulsory: boolean;
+  creator: Types.ObjectId;
 }
 
 interface Channel extends IChannel {
@@ -25,6 +26,11 @@ const channel_schema_fields: Record<keyof Channel, any> = {
   workspace: {
     type: Types.ObjectId,
     ref: "WorkSpace",
+    required: true,
+  },
+  creator: {
+    type: Types.ObjectId,
+    ref: "Student",
     required: true,
   },
   compulsory: {

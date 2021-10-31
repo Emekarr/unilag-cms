@@ -125,7 +125,6 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     }
     req.id = student._id;
     req.is_admin = student.admin;
-    console.log("end");
     next();
   } catch (err) {
     next(err);
