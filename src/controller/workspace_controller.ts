@@ -115,6 +115,26 @@ const get_info = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const get_members_count = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.body;
+    const workspace = WorkSpace.findById(id);
+    if (!workspace)
+      return new ServerResponse("No workspace exists with such id")
+        .statusCode(404)
+        .success(false)
+        .respond(res);
+    const count = (await workspace).getMembersCount();
+    new ServerResponse("Members count returned").data({ count }).respond(res);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const set_timetable = async (
   req: Request,
   res: Response,
@@ -131,5 +151,6 @@ const set_timetable = async (
 export default {
   create_workspace,
   join_workspace,
+  get_members_count,
   get_info,
 };

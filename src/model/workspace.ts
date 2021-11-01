@@ -11,6 +11,7 @@ export interface IWorkSpace {
 export interface WorkSpaceDocument extends Document, IWorkSpace {
   channels: Types.ObjectId[];
   members: Types.ObjectId[];
+  getMembersCount: () => number;
 }
 
 const workspace_schema_fields: Record<keyof IWorkSpace, any> = {
@@ -59,5 +60,12 @@ WorkSpaceSchema.method("toJSON", function (this: WorkSpaceDocument) {
   delete workspace.__v;
   return workspace;
 });
+
+WorkSpaceSchema.method(
+  "getMembersCount",
+  async function (this: WorkSpaceDocument) {
+    return this.members.length;
+  }
+);
 
 export default model<WorkSpaceDocument>("WorkSpace", WorkSpaceSchema);
