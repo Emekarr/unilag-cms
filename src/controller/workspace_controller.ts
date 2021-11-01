@@ -19,7 +19,10 @@ const create_workspace = async (
       ...workspace_details,
       creator: req.id,
     });
+    const student = await Student.findById(req.id);
+    new_workspace.members.push(student._id);
     const workspace = await new_workspace.save();
+    await student.save();
     if (!workspace)
       throw new CustomError(
         "Something went wrong with creating the workspace",
@@ -57,7 +60,9 @@ const join_workspace = async (
       ).respond(res);
 
     student.workspaces.push(workspace._id);
+    workspace.members.push(student._id);
     await student.save();
+    await workspace.save();
     new ServerResponse("Joined workspace successfully.").respond(res);
   } catch (err) {
     next(err);
@@ -118,7 +123,6 @@ const set_timetable = async (
   try {
     if (!req.is_admin)
       throw new CustomError("Only admins can access this route.", 401);
-    
   } catch (err) {
     next(err);
   }
