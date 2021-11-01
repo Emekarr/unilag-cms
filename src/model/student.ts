@@ -97,12 +97,14 @@ const student_schema_fields: Record<keyof Student, any> = {
     {
       type: Types.ObjectId,
       ref: "WorkSpace",
+      unique: true,
     },
   ],
   electives: [
     {
       type: Types.ObjectId,
       ref: "WorkSpace",
+      unique: true,
     },
   ],
 };

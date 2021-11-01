@@ -11,10 +11,7 @@ import send_otp_sms from "../utils/send_otp_sms";
 const sign_up = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const student_data: IStudent = req.body;
-    const new_student = new Student({
-      ...student_data,
-      expireAt: Date.now(),
-    });
+    const new_student = new Student(student_data);
     const student = await new_student.save();
     if (!student) throw new CustomError("Could not create new entry.", 400);
     new ServerResponse("Student created successfully.")

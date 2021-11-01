@@ -39,11 +39,10 @@ const channel_schema_fields: Record<keyof Channel, any> = {
   },
   subscribers: [
     {
-      subscriber: {
-        type: Types.ObjectId,
-        ref: "Student",
-        required: true,
-      },
+      type: Types.ObjectId,
+      ref: "Student",
+      required: true,
+      unique: true,
     },
   ],
 };
