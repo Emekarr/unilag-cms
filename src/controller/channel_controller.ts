@@ -5,7 +5,6 @@ import WorkSpace from "../model/workspace";
 import Student from "../model/student";
 import ServerResponse from "../utils/response";
 import CustomError from "../utils/custom_error";
-import { Server } from "http";
 
 const create_channel = async (
   req: Request,
@@ -30,7 +29,16 @@ const create_channel = async (
         401
       );
     const new_channel = new Channel({ ...channel_data, creator: req.id });
-    const channel = await new_channel.save();
+    let channel: ChannelDocument | undefined | null;
+    if (new_channel.compulsory) {
+      channel = await new_channel.save();
+    } else {
+      const student = await Student.findById(req.id);
+      student.electives.push(new_channel._id);
+      new_channel.subscribers.push(student._id);
+      await student.save();
+      channel = await new_channel.save();
+    }
     if (!channel)
       throw new CustomError(
         "Something went wrong with creating the workspace",
@@ -108,7 +116,7 @@ const join_channel = async (
         student.electives.push(channel._id);
         channel.subscribers.push(student._id);
         await student.save();
-        await channel.save()
+        await channel.save();
       }
     }
     new ServerResponse("Channel joined").data(channel).respond(res);
