@@ -1,5 +1,5 @@
 import { Router } from "express";
-import multer_setup from "../../multer_setup";
+import multer_setup from "../../utils/multer_setup";
 
 import admin_middleware from "../../middleware/admin_middleware";
 import workspace_controller from "../../controller/workspace_controller";

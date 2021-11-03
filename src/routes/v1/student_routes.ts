@@ -1,5 +1,5 @@
 import { Router } from "express";
-import multer_setup from "../../multer_setup";
+import multer_setup from "../../utils/multer_setup";
 
 import student_controller from "../../controller/student_controller";
 import admin_middleware from "../../middleware/admin_middleware";

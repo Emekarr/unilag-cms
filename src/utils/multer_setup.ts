@@ -1,6 +1,6 @@
 import multer from "multer";
 
-import CustomError from "./utils/custom_error";
+import CustomError from "./custom_error";
 
 export default multer({
   limits: {
