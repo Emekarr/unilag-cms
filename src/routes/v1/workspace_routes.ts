@@ -1,11 +1,15 @@
 import { Router } from "express";
-import multer from "multer";
-const upload = multer();
+import multer_setup from "../../multer_setup";
 
 import admin_middleware from "../../middleware/admin_middleware";
 import workspace_controller from "../../controller/workspace_controller";
-const { create_workspace, join_workspace, get_info, get_members_count } =
-  workspace_controller;
+const {
+  create_workspace,
+  join_workspace,
+  get_info,
+  get_members_count,
+  set_timetable,
+} = workspace_controller;
 
 const router = Router();
 
@@ -17,6 +21,11 @@ router.get("/info", get_info);
 
 router.get("/count", get_members_count);
 
-router.patch("/timtable", upload.single("timetable"), admin_middleware);
+router.patch(
+  "/timetable",
+  admin_middleware,
+  multer_setup.single("timetable"),
+  set_timetable
+);
 
 export default router;

@@ -141,8 +141,16 @@ const set_timetable = async (
   next: NextFunction
 ) => {
   try {
-    if (!req.is_admin)
-      throw new CustomError("Only admins can access this route.", 401);
+    const { id } = req.body;
+    const workspace = await WorkSpace.findById(id);
+    if (!workspace)
+      return new ServerResponse("No workspace exists with such id")
+        .success(false)
+        .statusCode(404)
+        .respond(res);
+    workspace.timetable = req.file.buffer;
+    await workspace.save();
+    new ServerResponse("Timetable updated").data(workspace).respond(res);
   } catch (err) {
     next(err);
   }
@@ -153,4 +161,5 @@ export default {
   join_workspace,
   get_members_count,
   get_info,
+  set_timetable,
 };
