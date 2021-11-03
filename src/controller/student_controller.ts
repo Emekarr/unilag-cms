@@ -251,6 +251,23 @@ const get_profile = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const update_profile_image = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const student = await Student.findById(req.id);
+    student.profile_image = req.file.buffer;
+    await student.save();
+    new ServerResponse("Successfully retrieved profile")
+      .data(student)
+      .respond(res);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export default {
   sign_up,
   request_otp,
@@ -259,4 +276,5 @@ export default {
   update_password,
   login_student,
   get_profile,
+  update_profile_image
 };

@@ -16,6 +16,7 @@ export interface IStudent {
 }
 
 interface Student extends IStudent {
+  profile_image: Buffer;
   verified_phone: boolean;
   recovery_otp: number;
   createdAt?: number | null;
@@ -89,6 +90,7 @@ const student_schema_fields: Record<keyof Student, any> = {
     default: Date.now,
     // expires: "5m",
   },
+  profile_image: Buffer,
   admin: {
     type: Boolean,
     default: false,

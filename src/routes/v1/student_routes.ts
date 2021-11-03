@@ -1,6 +1,8 @@
 import { Router } from "express";
+import multer_setup from "../../multer_setup";
 
 import student_controller from "../../controller/student_controller";
+import admin_middleware from "../../middleware/admin_middleware";
 const {
   sign_up,
   request_otp,
@@ -9,6 +11,7 @@ const {
   update_password,
   login_student,
   get_profile,
+  update_profile_image,
 } = student_controller;
 import auth_middleware from "../../middleware/auth_middleware";
 
@@ -29,5 +32,13 @@ router.patch("/auth/update-password", update_password);
 
 // other routes
 router.get("/profile", auth_middleware, get_profile);
+
+router.patch(
+  "/profile_image",
+  auth_middleware,
+  admin_middleware,
+  multer_setup.single("profile-image"),
+  update_profile_image
+);
 
 export default router;
