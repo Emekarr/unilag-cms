@@ -6,7 +6,7 @@ import ServerResponse from "./utils/response";
 import("./model/connect");
 
 class App {
-  private express: Application;
+  public express: Application;
   constructor() {
     this.express = express();
 
