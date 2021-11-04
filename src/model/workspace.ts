@@ -47,12 +47,24 @@ const workspace_schema_fields: Record<keyof IWorkSpace, any> = {
 
 const WorkSpaceSchema = new Schema(workspace_schema_fields, {
   timestamps: true,
+  toJSON: {
+    virtuals: true,
+  },
+  toObject: {
+    virtuals: true,
+  },
 });
 
 WorkSpaceSchema.virtual("members", {
   ref: "Student",
   localField: "_id",
   foreignField: "workspaces",
+});
+
+WorkSpaceSchema.virtual("channels", {
+  ref: "Channel",
+  localField: "_id",
+  foreignField: "workspace",
 });
 
 WorkSpaceSchema.method("toJSON", function (this: WorkSpaceDocument) {
@@ -64,6 +76,7 @@ WorkSpaceSchema.method("toJSON", function (this: WorkSpaceDocument) {
 WorkSpaceSchema.method(
   "getMembersCount",
   async function (this: WorkSpaceDocument) {
+    await this.populate("members");
     return this.members.length;
   }
 );

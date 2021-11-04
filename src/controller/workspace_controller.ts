@@ -19,15 +19,15 @@ const create_workspace = async (
       ...workspace_details,
       creator: req.id,
     });
-    const student = await Student.findById(req.id);
-    new_workspace.members.push(student._id);
     const workspace = await new_workspace.save();
-    await student.save();
     if (!workspace)
       throw new CustomError(
         "Something went wrong with creating the workspace",
         400
       );
+    const student = await Student.findById(req.id);
+    student.workspaces.push(workspace._id);
+    await student.save();
     new ServerResponse("WorkSpace created successfully.")
       .data(workspace)
       .respond(res);
@@ -122,14 +122,16 @@ const get_members_count = async (
 ) => {
   try {
     const { id } = req.body;
-    const workspace = WorkSpace.findById(id);
+    const workspace = await WorkSpace.findById(id);
     if (!workspace)
       return new ServerResponse("No workspace exists with such id")
         .statusCode(404)
         .success(false)
         .respond(res);
-    const count = (await workspace).getMembersCount();
-    new ServerResponse("Members count returned").data({ count }).respond(res);
+    const count = await workspace.getMembersCount();
+    new ServerResponse("Members count returned")
+      .data({ count: count })
+      .respond(res);
   } catch (err) {
     next(err);
   }
@@ -141,14 +143,18 @@ const set_timetable = async (
   next: NextFunction
 ) => {
   try {
-    const { id } = req.body;
+    const { id } = req.query;
     const workspace = await WorkSpace.findById(id);
     if (!workspace)
       return new ServerResponse("No workspace exists with such id")
         .success(false)
         .statusCode(404)
         .respond(res);
-    workspace.timetable = req.file.buffer;
+    if (req.file) {
+      workspace.timetable = req.file.buffer;
+    } else {
+      workspace.timetable = null;
+    }
     await workspace.save();
     new ServerResponse("Timetable updated").data(workspace).respond(res);
   } catch (err) {

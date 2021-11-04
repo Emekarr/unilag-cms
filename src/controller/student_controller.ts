@@ -258,7 +258,11 @@ const update_profile_image = async (
 ) => {
   try {
     const student = await Student.findById(req.id);
-    student.profile_image = req.file.buffer;
+    if (req.file) {
+      student.profile_image = req.file.buffer;
+    } else {
+      student.profile_image = null;
+    }
     await student.save();
     new ServerResponse("Successfully retrieved profile")
       .data(student)
@@ -276,5 +280,5 @@ export default {
   update_password,
   login_student,
   get_profile,
-  update_profile_image
+  update_profile_image,
 };
