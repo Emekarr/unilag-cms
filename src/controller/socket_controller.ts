@@ -1,4 +1,5 @@
 import { Server, Socket } from "socket.io";
+import { isValidObjectId } from "mongoose";
 
 export default class SocketController {
   private socket: Socket;
@@ -12,9 +13,17 @@ export default class SocketController {
 
   private joinAllRoom() {
     this.socket.on("join_all_room", (data: { channel_ids: string[] }) => {
-      data.channel_ids.forEach((id) => {
-        this.socket.join(id);
-      });
+      try {
+        data.channel_ids.forEach((id) => {
+          if (isValidObjectId(id)) {
+            this.socket.join(id);
+          } else {
+            throw new Error("Invalid channel id passed");
+          }
+        });
+      } catch (err) {
+        this.socket.emit("error", err.message);
+      }
     });
   }
 
