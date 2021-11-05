@@ -1,12 +1,19 @@
+import { createServer, Server } from "http";
+
 import express, { Application, Request, Response } from "express";
+import socket from "socket.io";
 
 import router from "./routes/index";
 import error_middleware from "./middleware/error_middleware";
 import ServerResponse from "./utils/response";
 import("./model/connect");
+import SocketController from "./controller/socket_controller";
 
 class App {
-  public express: Application;
+  private express: Application;
+  public server: Server;
+  public io: socket.Server;
+
   constructor() {
     this.express = express();
 
@@ -29,8 +36,11 @@ class App {
     });
   }
 
-  listen(port: string, cb: () => void) {
-    this.express.listen(port, cb);
+  listenWithSocket(port: string, cb: () => void) {
+    this.server = createServer(this.express);
+    this.io = new socket.Server(this.server);
+    new SocketController(this.io);
+    this.server.listen(port, cb);
   }
 }
 

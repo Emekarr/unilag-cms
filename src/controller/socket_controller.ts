@@ -1,12 +1,7 @@
-import { io } from "../socket";
+import { Server } from "socket.io";
 
-class SocketController {
-  private socket;
-  constructor() {
-    io.on("connection", (socket) => {
-      this.socket = socket;
-    });
+export default class SocketController {
+  constructor(io: Server) {
+    io.on("connection", (socket) => {});
   }
 }
-
-export default new SocketController();
