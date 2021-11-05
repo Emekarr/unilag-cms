@@ -6,8 +6,8 @@ import socket from "socket.io";
 import router from "./routes/index";
 import error_middleware from "./middleware/error_middleware";
 import ServerResponse from "./utils/response";
-import("./model/connect");
 import SocketController from "./controller/socket_controller";
+import("./model/connect");
 
 class App {
   private express: Application;
