@@ -1,5 +1,7 @@
 import { Schema, model, Model, Document, Types } from "mongoose";
 
+import { MessageDocument } from "./message";
+
 export interface IChannel {
   name: string;
   workspace: Types.ObjectId;
@@ -12,6 +14,7 @@ interface Channel extends IChannel {
 }
 
 export interface ChannelDocument extends Channel, Document {
+  messages: MessageDocument[];
   getSubscribersNumber: () => number;
 }
 
@@ -49,6 +52,12 @@ const channel_schema_fields: Record<keyof Channel, any> = {
 
 const ChannelSchema = new Schema<IChannel>(channel_schema_fields, {
   timestamps: true,
+});
+
+ChannelSchema.virtual("messages", {
+  ref: "Message",
+  localField: "_id",
+  foreignField: "channel",
 });
 
 ChannelSchema.method("getSubscribersNumber", function (this: ChannelDocument) {
