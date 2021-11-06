@@ -20,7 +20,6 @@ interface Student extends IStudent {
   verified_phone: boolean;
   recovery_otp: number;
   createdAt?: number | null;
-  admin: boolean;
   workspaces: Types.ObjectId[];
   electives: Types.ObjectId[];
 }
@@ -91,10 +90,6 @@ const student_schema_fields: Record<keyof Student, any> = {
     // expires: "5m",
   },
   profile_image: Buffer,
-  admin: {
-    type: Boolean,
-    default: false,
-  },
   workspaces: [
     {
       type: Types.ObjectId,

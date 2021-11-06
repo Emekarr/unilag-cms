@@ -6,6 +6,7 @@ export interface IWorkSpace {
   year: number;
   timetable: Buffer | null;
   creator: Types.ObjectId;
+  admins: Types.ObjectId[];
 }
 
 export interface WorkSpaceDocument extends Document, IWorkSpace {
@@ -43,6 +44,13 @@ const workspace_schema_fields: Record<keyof IWorkSpace, any> = {
     red: "Student",
     required: true,
   },
+  admins: [
+    {
+      type: Types.ObjectId,
+      red: "Student",
+      required: true,
+    },
+  ],
 };
 
 const WorkSpaceSchema = new Schema(workspace_schema_fields, {

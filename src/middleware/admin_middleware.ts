@@ -1,10 +1,15 @@
 import { Request, Response, NextFunction } from "express";
 
 import ServerResponse from "../utils/response";
+import WorkSpace from "../model/workspace";
 
-export default (req: Request, res: Response, next: NextFunction) => {
+export default async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!req.is_admin)
+    const workspace = await WorkSpace.findById(req.body.workspace);
+    const is_admin = workspace.admins.find(
+      (admin) => admin.toString() === req.id
+    );
+    if (!is_admin)
       return new ServerResponse(
         "You do not have permission to access this route"
       )
@@ -12,6 +17,7 @@ export default (req: Request, res: Response, next: NextFunction) => {
         .success(false)
         .respond(res);
 
+    req.is_admin = true;
     next();
   } catch (err) {
     next(err);
