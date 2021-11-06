@@ -215,7 +215,7 @@ const login_student = async (
       httpOnly: true,
       maxAge: 7884008,
     });
-    new ServerResponse("Login successful").respond(res);
+    new ServerResponse("Login successful").data(student).respond(res);
   } catch (err) {
     next(err);
   }
