@@ -36,7 +36,6 @@ router.get("/profile", auth_middleware, get_profile);
 router.patch(
   "/profile_image",
   auth_middleware,
-  admin_middleware,
   multer_setup.single("profile-image"),
   update_profile_image
 );

@@ -1,7 +1,12 @@
 import { Server, Socket } from "socket.io";
 import { isValidObjectId } from "mongoose";
 
-import { JoinAllRoomsType } from "../types/socket_types/socket_types";
+import Channel from "../model/channels";
+import Message from "../model/message";
+import {
+  JoinAllRoomsType,
+  MessageType,
+} from "../types/socket_types/socket_types";
 
 export default class SocketController {
   private socket: Socket;
@@ -10,6 +15,7 @@ export default class SocketController {
       this.socket = socket;
       this.joinAllRoom();
       this.exitAllRoom();
+      // this.sendMessage();
     });
   }
 
@@ -36,4 +42,26 @@ export default class SocketController {
       });
     });
   }
+
+  // private sendMessage() {
+  //   this.socket.on("send_message", async (data: MessageType) => {
+  //     try {
+  //       const channel = await Channel.findById(data.channel);
+  //       if (!channel) throw new Error("Channel does not exist");
+  //       const message = new Message(data);
+  //       message
+  //         .save()
+  //         .then((message) => {
+  //           this.socket.broadcast
+  //             .to(data.channel)
+  //             .emit("recieve_message", message);
+  //         })
+  //         .catch((err) => {
+  //           throw new Error(`Sending message failed : ${err.message}`);
+  //         });
+  //     } catch (err) {
+  //       this.socket.emit("error", err.message);
+  //     }
+  //   });
+  // }
 }

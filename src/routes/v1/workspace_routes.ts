@@ -3,6 +3,7 @@ import multer_setup from "../../utils/multer_setup";
 
 import admin_middleware from "../../middleware/admin_middleware";
 import workspace_controller from "../../controller/workspace_controller";
+import class_rep_middleware from "../../middleware/class_rep_middleware";
 const {
   create_workspace,
   join_workspace,
@@ -13,7 +14,7 @@ const {
 
 const router = Router();
 
-router.post("/create", admin_middleware, create_workspace);
+router.post("/create", class_rep_middleware, create_workspace);
 
 router.patch("/join", join_workspace);
 

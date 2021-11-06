@@ -3,5 +3,6 @@ declare namespace Express {
     id: string;
     is_admin: boolean;
     file: any;
+    class_rep: boolean;
   }
 }

@@ -11,9 +11,6 @@ const create_workspace = async (
   next: NextFunction
 ) => {
   try {
-    if (!req.is_admin)
-      throw new CustomError("Only admins can access this route.", 401);
-
     const workspace_details: IWorkSpace = req.body;
     const new_workspace = new WorkSpace({
       ...workspace_details,
