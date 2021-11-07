@@ -46,6 +46,7 @@ const channel_schema_fields: Record<keyof Channel, any> = {
       ref: "Student",
       required: true,
       unique: true,
+      sparse: true,
     },
   ],
 };

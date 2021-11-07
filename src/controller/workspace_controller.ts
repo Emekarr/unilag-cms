@@ -24,7 +24,7 @@ const create_workspace = async (
         400
       );
     const student = await Student.findById(req.id);
-    student.workspaces.push(workspace._id);
+    student.workspaces.push({ workspace: workspace._id });
     await student.save();
     new ServerResponse("WorkSpace created successfully.")
       .data(workspace)
@@ -50,17 +50,15 @@ const join_workspace = async (
         404
       );
     const already_a_member = student.workspaces.find(
-      (ws) => ws.toString() === workspace._id.toString()
+      (ws) => ws.workspace.toString() === workspace._id.toString()
     );
     if (already_a_member)
       return new ServerResponse(
         "You are already a member of this workspace."
       ).respond(res);
 
-    student.workspaces.push(workspace._id);
-    workspace.members.push(student._id);
+    student.workspaces.push({ workspace: workspace._id });
     await student.save();
-    await workspace.save();
     new ServerResponse("Joined workspace successfully.").respond(res);
   } catch (err) {
     next(err);
@@ -95,7 +93,7 @@ const get_info = async (req: Request, res: Response, next: NextFunction) => {
     }
     const student = await Student.findById(req.id);
     const is_member = student.workspaces.find(
-      (ws) => ws.toString() === workspace._id.toString()
+      (ws) => ws.workspace.toString() === workspace._id.toString()
     );
     if (!is_member)
       return new ServerResponse(

@@ -23,7 +23,7 @@ const create_channel = async (
     if (!channel_data.compulsory) channel_data.compulsory = false;
     const workspace = await WorkSpace.findById(channel_data.workspace);
     if (!workspace) throw new CustomError("The workspace does not exist", 401);
-    if (workspace.creator.toString() !== req.id.toString() || !req.is_admin)
+    if (workspace.creator.toString() !== req.id.toString() || !req.class_rep)
       throw new CustomError(
         "You do not have permission to create a channel for this workspace",
         401
@@ -34,7 +34,7 @@ const create_channel = async (
       channel = await new_channel.save();
     } else {
       const student = await Student.findById(req.id);
-      student.electives.push(new_channel._id);
+      student.electives.push({ elective: new_channel._id });
       new_channel.subscribers.push(student._id);
       await student.save();
       channel = await new_channel.save();
@@ -67,12 +67,12 @@ const channel_details = async (
     const student = await Student.findById(req.id);
     if (channel.compulsory) {
       const is_member = student.workspaces.find(
-        (ws) => ws.toString() === channel.workspace.toString()
+        (ws) => ws.workspace.toString() === channel.workspace.toString()
       );
       if (!is_member) throw new CustomError("You cannot access this data", 401);
     } else {
       const is_member = student.electives.find(
-        (channel) => channel === channel._id
+        (el) => el.elective.toString() === channel._id.toString()
       );
       if (!is_member) throw new CustomError("You cannot access this data", 401);
     }
@@ -99,7 +99,7 @@ const join_channel = async (
     const student = await Student.findById(req.id);
     if (channel.compulsory) {
       const is_member = student.workspaces.find((ws) => {
-        ws.toString() === channel.workspace.toString();
+        ws.workspace.toString() === channel.workspace.toString();
       });
       if (!is_member) {
         throw new CustomError("You cannot access this data", 401);
@@ -108,12 +108,12 @@ const join_channel = async (
       }
     } else {
       const is_member = student.electives.find(
-        (channel) => channel === channel._id
+        (el) => el.elective.toString() === channel._id.toString()
       );
       if (is_member) {
         throw new CustomError("You are already a member of this channel", 401);
       } else {
-        student.electives.push(channel._id);
+        student.electives.push({ elective: channel._id });
         channel.subscribers.push(student._id);
         await student.save();
         await channel.save();

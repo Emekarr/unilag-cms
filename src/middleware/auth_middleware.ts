@@ -124,7 +124,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
         .respond(res);
     }
     req.id = student._id;
-    req.class_rep = student.class_rep
+    req.class_rep = student.class_rep;
     next();
   } catch (err) {
     next(err);

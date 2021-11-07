@@ -38,7 +38,10 @@ const workspace_schema_fields: Record<keyof IWorkSpace, any> = {
     minlength: 4,
     maxlength: 4,
   },
-  timetable: Buffer,
+  timetable: {
+    type: Buffer,
+    default: null,
+  },
   creator: {
     type: Types.ObjectId,
     red: "Student",
@@ -66,7 +69,7 @@ const WorkSpaceSchema = new Schema(workspace_schema_fields, {
 WorkSpaceSchema.virtual("members", {
   ref: "Student",
   localField: "_id",
-  foreignField: "workspaces",
+  foreignField: "workspaces.workspace",
 });
 
 WorkSpaceSchema.virtual("channels", {

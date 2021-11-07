@@ -21,8 +21,8 @@ interface Student extends IStudent {
   recovery_otp: number;
   class_rep: boolean;
   createdAt?: number | null;
-  workspaces: Types.ObjectId[];
-  electives: Types.ObjectId[];
+  workspaces: { workspace: Types.ObjectId }[];
+  electives: { elective: Types.ObjectId }[];
 }
 
 export interface StudentDocument extends Document, Student {
@@ -97,16 +97,20 @@ const student_schema_fields: Record<keyof Student, any> = {
   profile_image: Buffer,
   workspaces: [
     {
-      type: Types.ObjectId,
-      ref: "WorkSpace",
-      unique: true,
+      workspace: {
+        type: Types.ObjectId,
+        ref: "WorkSpace",
+        sparse: true,
+      },
     },
   ],
   electives: [
     {
-      type: Types.ObjectId,
-      ref: "WorkSpace",
-      unique: true,
+      elective: {
+        type: Types.ObjectId,
+        ref: "Channel",
+        sparse: true,
+      },
     },
   ],
 };
