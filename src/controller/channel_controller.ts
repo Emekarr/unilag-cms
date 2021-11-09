@@ -147,10 +147,15 @@ const get_all_user_channels = async (
         400
       );
     const workspace = await WorkSpace.findById(id);
+    if (!workspace)
+      return new ServerResponse("Workspace does not exist")
+        .success(false)
+        .statusCode(404)
+        .respond(res);
     const channels = await workspace.getChannelList();
     const compulsory = channels.filter((ch) => ch.compulsory === true);
     const elective = channels.filter((ch) =>
-      ch.subscribers.find((sub) => sub.toString() === req.id)
+      ch.subscribers.find((sub) => sub.toString() === req.id.toString())
     );
     new ServerResponse("Channels list returned")
       .data({ channels: [...compulsory, ...elective] })

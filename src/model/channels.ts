@@ -45,7 +45,6 @@ const channel_schema_fields: Record<keyof Channel, any> = {
       type: Types.ObjectId,
       ref: "Student",
       required: true,
-      unique: true,
       sparse: true,
     },
   ],
