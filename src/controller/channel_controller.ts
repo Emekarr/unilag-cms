@@ -125,8 +125,44 @@ const join_channel = async (
   }
 };
 
+const get_all_user_channels = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.query;
+    if (!id)
+      return new ServerResponse("Please provide a workspace id")
+        .success(false)
+        .statusCode(400)
+        .respond(res);
+    const user = await Student.findById(req.id);
+    const is_member = user.workspaces.find(
+      (ws) => ws.workspace.toString() === id.toString()
+    );
+    if (!is_member)
+      throw new CustomError(
+        "You are not a member of thsis workspace and cannot access its channels.",
+        400
+      );
+    const workspace = await WorkSpace.findById(id);
+    const channels = await workspace.getChannelList();
+    const compulsory = channels.filter((ch) => ch.compulsory === true);
+    const elective = channels.filter((ch) =>
+      ch.subscribers.find((sub) => sub.toString() === req.id)
+    );
+    new ServerResponse("Channels list returned")
+      .data({ channels: [...compulsory, ...elective] })
+      .respond(res);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export default {
   create_channel,
   channel_details,
   join_channel,
+  get_all_user_channels,
 };

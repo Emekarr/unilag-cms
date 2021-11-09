@@ -9,7 +9,7 @@ export interface IChannel {
   creator: Types.ObjectId;
 }
 
-interface Channel extends IChannel {
+export interface Channel extends IChannel {
   subscribers: Types.ObjectId[];
 }
 

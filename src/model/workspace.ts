@@ -1,5 +1,7 @@
 import { model, Model, Schema, Document, Types } from "mongoose";
 
+import { Channel } from "./channels";
+
 export interface IWorkSpace {
   name: string;
   department: string;
@@ -13,6 +15,7 @@ export interface WorkSpaceDocument extends Document, IWorkSpace {
   channels: Types.ObjectId[];
   members: Types.ObjectId[];
   getMembersCount: () => number;
+  getChannelList: () => Channel[];
 }
 
 const workspace_schema_fields: Record<keyof IWorkSpace, any> = {
@@ -89,6 +92,14 @@ WorkSpaceSchema.method(
   async function (this: WorkSpaceDocument) {
     await this.populate("members");
     return this.members.length;
+  }
+);
+
+WorkSpaceSchema.method(
+  "getChannelList",
+  async function (this: WorkSpaceDocument) {
+    await this.populate("channels");
+    return this.channels;
   }
 );
 
