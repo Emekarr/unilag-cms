@@ -165,9 +165,40 @@ const get_all_user_channels = async (
   }
 };
 
+const get_all_workspace_channels = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.query;
+    if (!id)
+      return new ServerResponse("Please provide a workspace id")
+        .success(false)
+        .statusCode(400)
+        .respond(res);
+    const user = await Student.findById(req.id);
+    const is_member = user.workspaces.find(
+      (ws) => ws.workspace.toString() === id.toString()
+    );
+    if (!is_member)
+      throw new CustomError(
+        "You are not a member of thsis workspace and cannot access its channels.",
+        400
+      );
+    const channels = await Channel.find({ workspace: id.toString() });
+    new ServerResponse("Channels list returned")
+      .data({ channels })
+      .respond(res);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export default {
   create_channel,
   channel_details,
   join_channel,
   get_all_user_channels,
+  get_all_workspace_channels,
 };
