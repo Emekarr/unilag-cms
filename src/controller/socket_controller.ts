@@ -15,6 +15,7 @@ export default class SocketController {
       this.socket = socket;
       this.joinAllRoom();
       this.exitAllRoom();
+      this.joinRoom();
       this.sendMessage();
     });
   }
@@ -24,13 +25,14 @@ export default class SocketController {
   }
 
   private joinAllRoom() {
-    this.socket.on("join_all_room", (data: JoinAllRoomsType) => {
+    this.socket.on("join_all_rooms", (data: JoinAllRoomsType) => {
       try {
         data.channel_ids.forEach((id) => {
           if (!isValidObjectId(id))
             throw new Error("Invalid channel id passed");
           this.socket.join(id);
         });
+        console.log(this.socket.rooms);
       } catch (err) {
         this.emitError(err);
       }
@@ -38,12 +40,25 @@ export default class SocketController {
   }
 
   private exitAllRoom() {
-    this.socket.on("exit_all_room", () => {
+    this.socket.on("exit_all_rooms", () => {
       const rooms = [...this.socket.rooms];
       rooms.forEach((room) => {
         if (rooms.indexOf(room) === 0) return;
         this.socket.leave(room);
       });
+    });
+  }
+
+  private joinRoom() {
+    this.socket.on("join_room", (room: string) => {
+      try {
+        if (!isValidObjectId(room))
+          throw new Error("Invalid channel id passed");
+        this.socket.join(room);
+        console.log(this.socket.rooms);
+      } catch (err) {
+        this.emitError(err);
+      }
     });
   }
 
