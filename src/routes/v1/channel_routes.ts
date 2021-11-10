@@ -7,6 +7,7 @@ const {
   join_channel,
   get_all_user_channels,
   get_all_workspace_channels,
+  add_admin,
 } = channel_controller;
 import class_rep_middleware from "../../middleware/class_rep_middleware";
 
@@ -21,5 +22,7 @@ router.patch("/join", join_channel);
 router.get("/personal", get_all_user_channels);
 
 router.get("/workspace", get_all_workspace_channels);
+
+router.patch("/add-admin", class_rep_middleware, add_admin);
 
 export default router;

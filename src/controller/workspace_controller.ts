@@ -15,7 +15,6 @@ const create_workspace = async (
     const new_workspace = new WorkSpace({
       ...workspace_details,
       creator: req.id,
-      admins: [req.id],
     });
     const workspace = await new_workspace.save();
     if (!workspace)
