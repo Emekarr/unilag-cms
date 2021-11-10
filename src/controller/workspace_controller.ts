@@ -157,10 +157,58 @@ const set_timetable = async (
   }
 };
 
+const add_admin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { workspace_id, student_id } = req.body;
+    if (!workspace_id || !student_id)
+      return new ServerResponse("Please provide a workspace id and student id")
+        .success(false)
+        .statusCode(400)
+        .respond(res);
+    const student = await Student.findById(student_id);
+    if (!student)
+      return new ServerResponse("Student does not exist")
+        .success(false)
+        .statusCode(404)
+        .respond(res);
+    const is_member = student.workspaces.find(
+      (ws) => ws.workspace.toString() === workspace_id.toString()
+    );
+    if (!is_member)
+      return new ServerResponse(
+        "Student is not a member of the workspace and cannot be made an admin"
+      )
+        .success(false)
+        .statusCode(400)
+        .respond(res);
+    const workspace = await WorkSpace.findById(workspace_id);
+    if (!workspace)
+      return new ServerResponse("Workspace does not exist")
+        .success(false)
+        .statusCode(400)
+        .respond(res);
+    const is_admin = workspace.admins.find(
+      (admin) => admin.toString() === student_id.toString()
+    );
+    if (is_admin)
+      return new ServerResponse("Student is already an admin")
+        .success(false)
+        .statusCode(400)
+        .respond(res);
+    workspace.admins.push(student_id);
+    await workspace.save();
+
+    new ServerResponse("User added as admin").respond(res);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export default {
   create_workspace,
   join_workspace,
   get_members_count,
   get_info,
   set_timetable,
+  add_admin,
 };

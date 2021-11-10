@@ -11,6 +11,7 @@ const {
   get_info,
   get_members_count,
   set_timetable,
+  add_admin,
 } = workspace_controller;
 
 const router = Router();
@@ -30,5 +31,7 @@ router.patch(
   multer_setup.single("timetable"),
   set_timetable
 );
+
+router.patch("/add-admin", class_rep_middleware, add_admin);
 
 export default router;
