@@ -16,6 +16,7 @@ export default class SocketController {
       this.joinAllRoom();
       this.exitAllRoom();
       this.joinRoom();
+      this.exitRoom();
       this.sendMessage();
     });
   }
@@ -55,7 +56,18 @@ export default class SocketController {
         if (!isValidObjectId(room))
           throw new Error("Invalid channel id passed");
         this.socket.join(room);
-        console.log(this.socket.rooms);
+      } catch (err) {
+        this.emitError(err);
+      }
+    });
+  }
+
+  private exitRoom() {
+    this.socket.on("exit_room", (room: string) => {
+      try {
+        if (!isValidObjectId(room))
+          throw new Error("Invalid channel id passed");
+        this.socket.leave(room);
       } catch (err) {
         this.emitError(err);
       }
