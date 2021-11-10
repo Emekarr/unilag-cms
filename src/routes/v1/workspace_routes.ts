@@ -12,6 +12,7 @@ const {
   get_members_count,
   set_timetable,
   add_admin,
+  remove_admin,
 } = workspace_controller;
 
 const router = Router();
@@ -33,5 +34,7 @@ router.patch(
 );
 
 router.patch("/add-admin", class_rep_middleware, add_admin);
+
+router.patch("/remove-admin", class_rep_middleware, remove_admin);
 
 export default router;

@@ -204,6 +204,43 @@ const add_admin = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const remove_admin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { workspace_id, student_id } = req.body;
+    if (!workspace_id || !student_id)
+      return new ServerResponse("Please provide a workspace id and student id")
+        .success(false)
+        .statusCode(404)
+        .respond(res);
+    const workspace = await WorkSpace.findById(workspace_id);
+    if (!workspace)
+      return new ServerResponse("Workspace does not exist")
+        .success(false)
+        .statusCode(404)
+        .respond(res);
+    const is_admin = workspace.admins.find(
+      (admin) => admin.toString() === student_id.toString()
+    );
+    if (!is_admin)
+      return new ServerResponse("Student is not an admin")
+        .success(false)
+        .statusCode(400)
+        .respond(res);
+    workspace.admins = workspace.admins.filter(
+      (admin) => admin.toString() !== student_id.toString()
+    );
+    await workspace.save();
+
+    new ServerResponse("User removed as admin").respond(res);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export default {
   create_workspace,
   join_workspace,
@@ -211,4 +248,5 @@ export default {
   get_info,
   set_timetable,
   add_admin,
+  remove_admin,
 };
