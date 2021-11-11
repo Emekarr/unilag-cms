@@ -9,92 +9,94 @@ import {
 } from "../types/socket_types/socket_types";
 
 export default class SocketController {
-  private socket: Socket;
   constructor(private io: Server) {
-    io.on("connection", (socket) => {
-      this.socket = socket;
-      this.joinAllRoom();
-      this.exitAllRoom();
-      this.joinRoom();
-      this.exitRoom();
-      this.sendMessage();
+    this.io.on("connection", (socket) => {
+      this.joinAllRoom(socket);
+      this.exitAllRoom(socket);
+      this.joinRoom(socket);
+      this.exitRoom(socket);
+      this.sendMessage(socket);
     });
   }
 
-  private emitError(err: any) {
-    this.socket.emit("error", err.message);
+  private emitError(err: any, socket: Socket) {
+    socket.emit("error", err.message);
   }
 
-  private joinAllRoom() {
-    this.socket.on("join_all_rooms", (data: JoinAllRoomsType) => {
+  private joinAllRoom(socket: Socket) {
+    socket.on("join_all_rooms", (data: JoinAllRoomsType) => {
       try {
         data.channel_ids.forEach((id) => {
           if (!isValidObjectId(id))
             throw new Error("Invalid channel id passed");
-          this.socket.join(id);
+          socket.join(id);
         });
-        console.log(this.socket.rooms);
       } catch (err) {
-        this.emitError(err);
+        this.emitError(err, socket);
       }
     });
   }
 
-  private exitAllRoom() {
-    this.socket.on("exit_all_rooms", () => {
-      const rooms = [...this.socket.rooms];
+  private exitAllRoom(socket: Socket) {
+    socket.on("exit_all_rooms", () => {
+      const rooms = [...socket.rooms];
       rooms.forEach((room) => {
         if (rooms.indexOf(room) === 0) return;
-        this.socket.leave(room);
+        socket.leave(room);
       });
     });
   }
 
-  private joinRoom() {
-    this.socket.on("join_room", (room: string) => {
+  private joinRoom(socket: Socket) {
+    socket.on("join_room", async (room: string) => {
       try {
         if (!isValidObjectId(room))
           throw new Error("Invalid channel id passed");
-        this.socket.join(room);
+        socket.join(room);
       } catch (err) {
-        this.emitError(err);
+        this.emitError(err, socket);
       }
     });
   }
 
-  private exitRoom() {
-    this.socket.on("exit_room", (room: string) => {
+  private exitRoom(socket: Socket) {
+    socket.on("exit_room", (room: string) => {
       try {
         if (!isValidObjectId(room))
           throw new Error("Invalid channel id passed");
-        this.socket.leave(room);
+        socket.leave(room);
       } catch (err) {
-        this.emitError(err);
+        this.emitError(err, socket);
       }
     });
   }
 
-  private sendMessage() {
-    // this.socket.on("send_message", async (data: MessageType) => {
-    //   try {
-    //     if (!data.channel || !data.message || !data.sender)
-    //       throw new Error(
-    //         "Please provide the neccessary information needed to send a message"
-    //       );
-    //     const channel = await Channel.findById(data.channel);
-    //     if (!channel) throw new Error("Channel does not exist");
-    //     const message = new Message(data);
-    //     message
-    //       .save()
-    //       .then((message) => {
-    //         this.socket.broadcast.to(data.channel).emit("recieve", message);
-    //       })
-    //       .catch((err) => {
-    //         throw new Error(`Sending message failed : ${err.message}`);
-    //       });
-    //   } catch (err) {
-    //     this.emitError(err);
-    //   }
-    // });
+  private sendMessage(socket: Socket) {
+    socket.on("send_message", async (data: MessageType) => {
+      try {
+        if (!data.channel || !data.message || !data.sender)
+          throw new Error(
+            "Please provide the neccessary information needed to send a message"
+          );
+        const is_member = socket.rooms.has(data.channel);
+        if (!is_member)
+          throw new Error(
+            "You are not a member of this socket room and cannot send a message to this room"
+          );
+        const channel = await Channel.findById(data.channel);
+        if (!channel) throw new Error("Channel does not exist");
+        const message = new Message(data);
+        message
+          .save()
+          .then((message) => {
+            socket.to(data.channel).emit("recieve_message", message);
+          })
+          .catch((err) => {
+            throw new Error(`Sending message failed : ${err.message}`);
+          });
+      } catch (err) {
+        this.emitError(err, socket);
+      }
+    });
   }
 }
